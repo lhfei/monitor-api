@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.lhfei.monitor.orm.mapper.ModuleMapper">
+
+	<cache />
+
+	<sql id="DATA_STATUS_ACTIVITY">0</sql>
+	<sql id="API_SCHEMA">`monitor_admin`</sql>
+	<sql id="SCHEMA_ORG">`monitor_admin`.`sgrdb_schema_org`</sql>
+
+	<sql id="DEFAULT_SCHEMA_FILTER">
+		<choose>
+			<when test="schemaName != null and schemaName != ''"> = #{schemaName}</when>
+			<otherwise>IN (
+				'dwh_pms',
+				'dwh_cms',
+				'dwh_etm',
+				'dwh_arm'
+				)
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getSystems" parameterType="ModuleEntity" resultType="ModuleEntity">
+		SELECT
+		  o.`schema_name_zh` AS schemaNameZh,
+		  o.`schema_name_dwh` AS schemaName
+		FROM
+		  <include refid="SCHEMA_ORG" /> o
+		  		  
+		WHERE o.`schema_name_dwh` 
+		
+		<include refid="DEFAULT_SCHEMA_FILTER" />
+	</select>
+	
+	<select id="getModules" parameterType="ModuleEntity" resultType="ModuleEntity">
+		SELECT
+		  o.`schema_name_zh` AS schemaNameZh,
+		  d.`schema_name` AS schemaName,
+		  d.`fir_dir` AS firstDir,
+		  ROUND(
+		    SUM(t.`Data_length`) / 1024 / 1024 / 1024,
+		    2
+		  ) AS dirSize
+		FROM
+		  `sgrdb_schema_table_info` t,
+		  `sgrdb_data_dirctor` d,
+		  `sgrdb_schema_org` o
+		WHERE t.`Name` = LOWER(d.`table_name`)
+		  AND t.`Schema_name` = o.`schema_name_dwh`
+		  AND d.`schema_name` <include refid="DEFAULT_SCHEMA_FILTER" />		  
+		  -- AND DATE_FORMAT(t.`Ext_time`, '%Y-%m-%d') = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+		GROUP BY d.`fir_dir`,
+		  d.`schema_name`,
+		  o.`schema_name_zh`
+		ORDER BY o.`schema_name_zh`
+	
+	</select>
+	<select id="getStatistics" parameterType="ModuleEntity" resultType="StatisticsEntity">
+		SELECT
+		  a.`schema_name`    AS schemaName,
+		  b.`schema_name_zh` AS schemaNameZh,
+		  COUNT(a.`Name`)    AS total,
+		  CASE
+		    WHEN ROWS = 0
+		    THEN '空表'
+		    WHEN ROWS &gt; 0
+		    AND ROWS &lt;= 100000
+		    THEN '&lt;100K'
+		    WHEN ROWS &gt; 100000
+		    AND ROWS &lt;= 1000000
+		    THEN '100K-1M'
+		    WHEN ROWS &gt; 1000000
+		    AND ROWS &lt;= 10000000
+		    THEN '1M-10M'
+		    WHEN ROWS &gt; 10000000
+		    AND ROWS &lt;= 100000000
+		    THEN '10M-100M'
+		    WHEN ROWS &gt; 100000000
+		    THEN '&gt;100M'
+		  END AS rate,
+		  CASE
+		    WHEN ROWS = 0
+		    THEN '0'
+		    WHEN ROWS &gt; 0
+		    AND ROWS &lt;= 100000
+		    THEN '1'
+		    WHEN ROWS &gt; 100000
+		    AND ROWS &lt;= 1000000
+		    THEN '2'
+		    WHEN ROWS &gt; 1000000
+		    AND ROWS &lt;= 10000000
+		    THEN '3'
+		    WHEN ROWS &gt; 10000000
+		    AND ROWS &lt;= 100000000
+		    THEN '4'
+		    WHEN ROWS &gt; 100000000
+		    THEN '5'
+		  END AS sort
+		FROM
+		  `sgrdb_schema_table_info` a
+		  INNER JOIN `sgrdb_schema_org` b
+		    ON a.`schema_name` = b.`schema_name_dwh`
+		WHERE
+		  a.`schema_name`  <include refid="DEFAULT_SCHEMA_FILTER" />	
+		  -- DATE_FORMAT(a.`Ext_time`, '%Y-%m-%d') = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')
+		GROUP BY a.`schema_name`,
+		  b.`schema_name_zh`,
+		  rate, 
+		  sort
+		ORDER BY sort
+	</select>
+	
+	<select id="getWords" parameterType="ModuleEntity" resultType="StatisticsEntity">
+		SELECT
+		  d.`schema_name` AS schemaName,
+		  d.`table_ms`    AS rate,
+		  COUNT(*) 		  AS total
+		FROM
+		  `sgrdb_data_dirctor` d
+		WHERE d.`schema_name` <include refid="DEFAULT_SCHEMA_FILTER" />
+		GROUP BY d.`schema_name`,
+		  d.`table_ms`
+		  ORDER BY total DESC	
+	
+	</select>
+
+
+</mapper>

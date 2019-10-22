@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.lhfei.monitor.orm.mapper.OpsLogMapper">
+
+	<cache />
+
+	<sql id="DATA_STATUS_ACTIVITY">0</sql>
+	<sql id="API_SCHEMA">`monitor_admin`</sql>
+	<sql id="DATAFILE_FULLY_NAME">`monitor_admin`.`OPS_LOG`</sql>
+	
+	
+	<sql id="DATA_FILE_ALL_COLUMNS_NO_ID">
+		`INSTANCE_IP` ,
+		`SERVER_ID`   ,
+		`DB_NAME`     ,
+		`TABLE_NAME`  ,
+		`TYPE`	      ,
+		`OPS_TIME`    ,
+		`OPS_TS`      ,
+		`EFFECT_SIZE` ,
+		`AUDIT_TIME`  
+	</sql>
+
+	<sql id="DATA_FILE_ALL_COLUMNS">
+		`ID`	      ,
+		<include refid="DATA_FILE_ALL_COLUMNS_NO_ID"></include>
+	</sql>
+	
+	<sql id="DATA_FILE_ALL_COLUMNS_WITH_ALIAS">
+		`ID`	      as id         ,
+		`INSTANCE_IP` as instanceIp ,
+		`SERVER_ID`   as serverId   ,
+		`DB_NAME`     as dbName     ,
+		`TABLE_NAME`  as tableName  ,
+		`TYPE`	      as type       ,
+		`OPS_TIME`    as opsTime    ,
+		`OPS_TS`      as opsTs      ,
+		`EFFECT_SIZE` as effectSize ,
+		`AUDIT_TIME`  as auditTime  
+
+	</sql>
+	
+	<!-- ======== NoteRecord CRUD ======== -->
+	<insert id="create" parameterType="opsLog"
+		useGeneratedKeys="true" keyProperty="id" keyColumn="ID">
+		
+		INSERT INTO <include refid="DATAFILE_FULLY_NAME"/> (
+		  <include refid="DATA_FILE_ALL_COLUMNS_NO_ID"></include>
+		)
+		VALUES
+		  (
+			#{instanceIp} ,
+			#{serverId  } ,
+			#{dbName    } ,
+			#{tableName } ,
+			#{type      } ,
+			FROM_UNIXTIME(#{opsTs}/1000,'%Y-%m-%d %H:%i:%s') ,
+			#{opsTs     } ,
+			#{effectSize} ,
+			#{auditTime }  
+		  );
+	</insert>
+	
+
+	<!-- @Select("SELECT `ID`, `INSTANCE_IP`, `SERVER_ID`, `DB_NAME`, `TABLE_NAME`, `TYPE`, `OPS_TIME`, `OPS_TS`, `AUDIT_TIME` FROM `monitor_admin`.`OPS_LOG` WHERE `INSTANCE_IP`=#{instanceIp} AND `SERVER_ID`=${serverId} AND `DB_NAME`=${dbName} LIMIT 0, 1000") -->
+	<select id="find" parameterType="opsLog" resultType="opsLog">
+		SELECT
+
+		<include refid="DATA_FILE_ALL_COLUMNS_WITH_ALIAS"></include>
+			
+		FROM <include refid="DATAFILE_FULLY_NAME"/>
+
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="instanceIp != null">
+				`INSTANCE_IP` = #{instanceIp}
+			</if>								
+			<if test="serverId != null ">
+				AND `SERVER_ID` = #{serverId}
+			</if>
+			<if test="dbName != null and dbName != ''">
+				<bind name="pattern_name" value="'%' + _parameter + '%'" />
+				AND `DB_NAME` = #{pattern_name}
+			</if>
+		</trim>
+		
+		ORDER BY `OPS_TS` ASC
+		
+	</select>
+	
+	<select id="getSeries" parameterType="OpsSeries" resultType="OpsSeries">
+		<trim prefix="SELECT" prefixOverrides=",">
+			<if test="instanceIp != null">
+				`INSTANCE_IP` as instanceIp ,
+			</if>								
+			<if test="serverId != null ">
+				`SERVER_ID`   as serverId   ,
+			</if>
+			<if test="dbName != null and dbName != ''">
+				`DB_NAME`     as dbName     ,
+			</if>
+			<if test="tableName != null and tableName != ''">
+				`TABLE_NAME`  as tableName  ,
+			</if>
+			`TYPE`	    as type       ,
+			
+			<choose>
+				<when test="period == -2">`OPS_TIME`    as opsTime    ,</when>
+				<when test="period == -1">DATE_FORMAT(OPS_TIME,'%Y-%m-%d %H:%i') as opsTime , </when>
+				<when test="period == 0">DATE_FORMAT(OPS_TIME,'%Y-%m-%d %H') as opsTime , </when>
+				<when test="period == 1">DATE_FORMAT(OPS_TIME,'%Y-%m-%d') as opsTime , </when>
+				<when test="period == 7">`OPS_TIME`    as opsTime    ,</when>
+				<when test="period == 30">DATE_FORMAT(OPS_TIME,'%Y-%m') as opsTime ,</when>
+				<!-- <when test="period == 60">`OPS_TIME`    as opsTime    ,</when>
+				<when test="period == 90">`OPS_TIME`    as opsTime    ,</when>
+				<when test="period == 180">`OPS_TIME`    as opsTime    ,</when> -->
+				<when test="period == 365">DATE_FORMAT(OPS_TIME,'%Y') as opsTime    ,</when>
+
+				<otherwise>`OPS_TIME`    as opsTime    ,</otherwise>
+			</choose>
+			
+			SUM(`EFFECT_SIZE`) AS total
+		</trim>
+		FROM
+		  <include refid="DATAFILE_FULLY_NAME"/>
+		<!-- WHERE `ID` =
+		  (SELECT
+		    MAX(`ID`)
+		  FROM
+		    <include refid="DATAFILE_FULLY_NAME"/> ) -->
+		GROUP BY 
+		  <if test="instanceIp != null">
+				`INSTANCE_IP` ,
+			</if>								
+			<if test="serverId != null ">
+				`SERVER_ID`   ,
+			</if>
+			<if test="dbName != null and dbName != ''">
+				`DB_NAME`     ,
+			</if>
+			<if test="tableName != null and tableName != ''">
+				`TABLE_NAME`  ,
+			</if>
+		  
+		  `TYPE`,
+		  
+		  <choose>
+				<when test="period == -2">`OPS_TIME`</when>
+				<when test="period == -1">DATE_FORMAT(OPS_TIME,'%Y-%m-%d %H:%i')</when>
+				<when test="period == 0">DATE_FORMAT(OPS_TIME,'%Y-%m-%d %H')</when>
+				<when test="period == 1">DATE_FORMAT(OPS_TIME,'%Y-%m-%d')</when>
+				<when test="period == 7">`OPS_TIME`</when>
+				<when test="period == 30">DATE_FORMAT(OPS_TIME,'%Y-%m')</when>
+				<!-- <when test="period == 60">`OPS_TIME`    as opsTime    ,</when>
+				<when test="period == 90">`OPS_TIME`    as opsTime    ,</when>
+				<when test="period == 180">`OPS_TIME`    as opsTime    ,</when> -->
+				<when test="period == 365">DATE_FORMAT(OPS_TIME,'%Y')</when>
+
+				<otherwise>`OPS_TIME`</otherwise>
+			</choose>	
+	</select>
+
+	
+</mapper>
