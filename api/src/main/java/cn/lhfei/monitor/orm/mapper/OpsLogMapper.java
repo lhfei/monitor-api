@@ -34,6 +34,4 @@ import cn.lhfei.monitor.orm.domain.OpsSeries;
 public interface OpsLogMapper extends AbstractMapper<OpsLog, Long> {
 	
 	List<OpsSeries> getSeries(OpsSeries series) throws Exception;
-	
-	
 }

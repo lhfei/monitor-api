@@ -16,6 +16,9 @@
 
 package cn.lhfei.monitor.listener;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 
 import cn.lhfei.monitor.conveter.KafkaMessageConvert;
+import cn.lhfei.monitor.orm.domain.DmlOperationMessage;
 import cn.lhfei.monitor.orm.domain.OpsLog;
 import cn.lhfei.monitor.orm.mapper.OpsLogMapper;
 
@@ -41,24 +45,53 @@ public class KafkaConsumer {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumer.class);
 	private static Gson gson = new Gson();
-
-    @KafkaListener(topics = "example", groupId = "test")
+	private static final Integer BATCH_SIZE = 1000;
+	private BlockingQueue<OpsLog> queue = new LinkedBlockingQueue<>(BATCH_SIZE + 100);
+	
+	private static volatile boolean running = false;
+	private Thread thread = new Thread(new Runnable() {
+		public void run() {
+			process();
+		}
+	});
+	
+    @KafkaListener(topics = {"example"}, groupId = "test")
     public void consume(String message) {
     	try {
 			LOG.info(message);
-			OpsLog log = KafkaMessageConvert.convert(message);
-			opsLogMapper.create(log);
+			DmlOperationMessage log = KafkaMessageConvert.convert(message);
 			
-			/*List<OpsSeries> results = opsLogMapper.getSeries(log);
-			LOG.info("== {}", gson.toJson(results));*/
+			// opsLogMapper.create(log);
+			auditLog(log);
 			
-			this.messagingTemplate.convertAndSend("/topic/binlog", message);
+			this.messagingTemplate.convertAndSend("/topic/binlog", log);
 			
 		} catch (Exception e) {
 			LOG.error("Consumed message has an error. {}", e.getMessage(), e);
 		}
     }
     
+	private void auditLog(OpsLog log) {
+		queue.add(log);
+		if (!running) {
+			running = true;
+			thread.start();
+		}
+	}
+
+	private void process() {
+		while (running) {
+			if (queue.size() >= BATCH_SIZE) {
+				try {
+					opsLogMapper.batchInsert(queue);
+					
+					queue.clear();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
     
     @Autowired
 	private OpsLogMapper opsLogMapper;

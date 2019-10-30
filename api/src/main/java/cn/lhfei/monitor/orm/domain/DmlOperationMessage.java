@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package cn.lhfei.monitor.orm.mapper;
-
-import java.util.List;
+package cn.lhfei.monitor.orm.domain;
 
 /**
  * @version 0.1
  *
  * @author Hefei Li
  *
- * Created on Oct 09, 2019
+ * @created on Oct 30, 2019
  */
 
-public interface AbstractMapper<E, T> {
-	Long create(E model) throws Exception;
+public class DmlOperationMessage extends OpsLog {
+	private static final long serialVersionUID = -4264667399156943071L;
 
-	List<E> find(E model) throws Exception;
+	public String getSystem() {
+		return system;
+	}
 	
-	void batchInsert(java.util.concurrent.BlockingQueue<E> models) throws Exception;
+	public void setSystem(String system) {
+		this.system = system;
+	}
+
+	private String system;
 }

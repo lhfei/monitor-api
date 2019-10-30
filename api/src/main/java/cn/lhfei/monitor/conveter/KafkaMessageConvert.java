@@ -21,6 +21,8 @@ import java.util.Date;
 import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.google.gson.Gson;
 
+import cn.lhfei.monitor.constant.DMLTypeEnum;
+import cn.lhfei.monitor.orm.domain.DmlOperationMessage;
 import cn.lhfei.monitor.orm.domain.OpsLog;
 import cn.lhfei.monitor.orm.domain.OpsSeries;
 
@@ -57,14 +59,24 @@ public class KafkaMessageConvert {
 		}
 	};
 
-	public static OpsLog convert(String message) {
-		OpsLog log = opsLogThreadLocal.get();
-		
+	public static DmlOperationMessage convert(String message) {
+		DmlOperationMessage log = new DmlOperationMessage();
 		FlatMessage msg = gson.fromJson(message, FlatMessage.class);
+		
+		int size = 0;
+		DMLTypeEnum type = DMLTypeEnum.UPDATE;
+		
+		if(msg.getData() != null) { // check DML type: insert | update | delete
+			size = msg.getData().size();
+			String flag = msg.getData().get(0).get(DMLTypeEnum.DML_FLAG_FILED);
+			type = DMLTypeEnum.checkCode(flag);
+		}
+		log.setSystem(msg.getDatabase());
+		log.setDbName(msg.getDatabase());
 		log.setTableName(msg.getTable());
-		log.setType(msg.getType());
+		log.setType(type.getType());
 		log.setOpsTs(msg.getTs());
-		log.setEffectSize(msg.getData().size());
+		log.setEffectSize(size);
 		log.setOpsTime(new Date(msg.getTs()));
 		
 		return log;

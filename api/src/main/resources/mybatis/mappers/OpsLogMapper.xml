@@ -61,6 +61,26 @@
 		  );
 	</insert>
 	
+	<insert id="batchInsert" parameterType="java.util.concurrent.BlockingQueue">
+		
+		INSERT INTO <include refid="DATAFILE_FULLY_NAME"/> (
+		  <include refid="DATA_FILE_ALL_COLUMNS_NO_ID"></include>
+		)
+		VALUES 
+		
+		<foreach collection="collection" item="log" index="index" open="(" separator="),("  close=")">
+			#{log.instanceIp} ,
+			#{log.serverId  } ,
+			#{log.dbName    } ,
+			#{log.tableName } ,
+			#{log.type      } ,
+			FROM_UNIXTIME(#{log.opsTs}/1000,'%Y-%m-%d %H:%i:%s') ,
+			#{log.opsTs     } ,
+			#{log.effectSize} ,
+			#{log.auditTime }
+		</foreach>
+	</insert>
+	
 
 	<!-- @Select("SELECT `ID`, `INSTANCE_IP`, `SERVER_ID`, `DB_NAME`, `TABLE_NAME`, `TYPE`, `OPS_TIME`, `OPS_TS`, `AUDIT_TIME` FROM `monitor_admin`.`OPS_LOG` WHERE `INSTANCE_IP`=#{instanceIp} AND `SERVER_ID`=${serverId} AND `DB_NAME`=${dbName} LIMIT 0, 1000") -->
 	<select id="find" parameterType="opsLog" resultType="opsLog">
