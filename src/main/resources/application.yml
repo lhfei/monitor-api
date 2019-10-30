@@ -1,0 +1,6 @@
+# Druid datasource settings:
+spring:
+  profiles:
+    active:
+    - dev
+    
