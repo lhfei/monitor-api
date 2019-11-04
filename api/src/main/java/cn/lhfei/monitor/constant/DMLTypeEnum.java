@@ -26,14 +26,14 @@ package cn.lhfei.monitor.constant;
 
 public enum DMLTypeEnum {
 
-	INSERT("insert", "1"),
+	INSERT("INSERT", "1"),
 	
 	/**
 	 * has two status: BEFORE('3') and AFTER('4')
 	 */
-	UPDATE("update", "3"),
+	UPDATE("UPDATE", "3"),
 	
-	DELETE("delete", "2");
+	DELETE("DELETE", "2");
 	
 	DMLTypeEnum(String type,  String code) {
 		this.type = type;

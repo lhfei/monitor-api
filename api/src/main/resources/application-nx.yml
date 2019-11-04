@@ -29,9 +29,8 @@ spring:
       auto-offset-reset: earliest
     # change this property if you are using your own
     # Kafka cluster or your Docker IP is different
-    #bootstrap-servers: 192.168.134.92:9092
-    #bootstrap-servers: 192.168.135.120:9092,192.168.135.231:9092,192.168.135.255:9092
-    bootstrap-servers: 10.216.169.156:9192
+    #bootstrap-servers: 10.216.169.156:9192
+    bootstrap-servers: 192.168.111.226:9092,192.168.111.229:9092,192.168.111.228:9092
 
   
 mybatis:

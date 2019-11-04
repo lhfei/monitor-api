@@ -71,6 +71,7 @@ public class KafkaMessageConvert {
 			String flag = msg.getData().get(0).get(DMLTypeEnum.DML_FLAG_FILED);
 			type = DMLTypeEnum.checkCode(flag);
 		}
+		log.setInstanceIp("30071");
 		log.setSystem(msg.getDatabase());
 		log.setDbName(msg.getDatabase());
 		log.setTableName(msg.getTable());

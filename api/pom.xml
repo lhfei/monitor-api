@@ -195,21 +195,21 @@
 	</build>
 	
 	<profiles>
-    <profile>
-        <id>dev</id>
-        <activation>
-            <activeByDefault>true</activeByDefault>
-        </activation>
-        <properties>
-            <spring.profiles.active>dev</spring.profiles.active>
-        </properties>
-    </profile>
-    <profile>
-        <id>nx</id>
-        <properties>
-            <spring.profiles.active>nx</spring.profiles.active>
-        </properties>
-    </profile>
-</profiles>
+	    <profile>
+	        <id>dev</id>
+	        <activation>
+	            <activeByDefault>true</activeByDefault>
+	        </activation>
+	        <properties>
+	            <spring.profiles.active>dev</spring.profiles.active>
+	        </properties>
+	    </profile>
+	    <profile>
+	        <id>nx</id>
+	        <properties>
+	            <spring.profiles.active>nx</spring.profiles.active>
+	        </properties>
+	    </profile>
+	</profiles>
 
 </project>

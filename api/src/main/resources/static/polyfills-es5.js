@@ -16081,10 +16081,10 @@ window.global = window;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\Workspaces\webapp_app\ngx-admin\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\es5-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/es5-polyfills.js");
-__webpack_require__(/*! D:\Workspaces\webapp_app\ngx-admin\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\es5-jit-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/es5-jit-polyfills.js");
-__webpack_require__(/*! D:\Workspaces\webapp_app\ngx-admin\src\polyfills.ts */"./src/polyfills.ts");
-module.exports = __webpack_require__(/*! D:\Workspaces\webapp_app\ngx-admin\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\jit-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js");
+__webpack_require__(/*! D:\Workspaces\webapps_app\ngx-monitor\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\es5-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/es5-polyfills.js");
+__webpack_require__(/*! D:\Workspaces\webapps_app\ngx-monitor\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\es5-jit-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/es5-jit-polyfills.js");
+__webpack_require__(/*! D:\Workspaces\webapps_app\ngx-monitor\src\polyfills.ts */"./src/polyfills.ts");
+module.exports = __webpack_require__(/*! D:\Workspaces\webapps_app\ngx-monitor\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\jit-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js");
 
 
 /***/ })
