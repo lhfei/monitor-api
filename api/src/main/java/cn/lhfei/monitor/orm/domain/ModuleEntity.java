@@ -44,6 +44,14 @@ public class ModuleEntity extends AbstractEntity {
 		this.schemaNameZh = schemaNameZh;
 	}
 
+	public String getSchemaNameBuf() {
+		return schemaNameBuf;
+	}
+
+	public void setSchemaNameBuf(String schemaNameBuf) {
+		this.schemaNameBuf = schemaNameBuf;
+	}
+
 	public String getFirstDir() {
 		return firstDir;
 	}
@@ -86,6 +94,7 @@ public class ModuleEntity extends AbstractEntity {
 
 	private String schemaName;
 	private String schemaNameZh;
+	private String schemaNameBuf;
 	private String firstDir;
 	private String secondDir;
 	private String thirdDir;

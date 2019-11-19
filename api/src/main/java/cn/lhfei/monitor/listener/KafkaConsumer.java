@@ -58,7 +58,7 @@ public class KafkaConsumer {
     @KafkaListener(topics = {"example"}, groupId = "test")
     public void consume(String message) {
     	try {
-			LOG.info(message);
+			LOG.debug(message);
 			DmlOperationMessage log = KafkaMessageConvert.convert(message);
 			
 			// opsLogMapper.create(log);

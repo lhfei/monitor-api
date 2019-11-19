@@ -23,7 +23,8 @@
 	
 	<select id="getSystems" parameterType="ModuleEntity" resultType="ModuleEntity">
 		SELECT
-		  o.`schema_name_zh` AS schemaNameZh,
+		  o.`schema_name_zh`  AS schemaNameZh,
+		  o.`schema_name_buf` AS schemaNameBuf,
 		  o.`schema_name_dwh` AS schemaName
 		FROM
 		  <include refid="SCHEMA_ORG" /> o
